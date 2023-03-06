@@ -66,8 +66,11 @@ public class ExpensesGroupController {
     }
 
     @DeleteMapping("/{groupId}")
-    public ResponseEntity<?> deleteExpensesGroup(@PathVariable String group) {
-        return null;
+    public ResponseEntity<MessageResponse> deleteExpensesGroup(@PathVariable String groupId) {
+
+        this.expensesGroupService.deleteExpensesGroup(groupId);
+
+        return ResponseEntity.ok(new MessageResponse("Expenses group deleted successfully."));
     }
 
 

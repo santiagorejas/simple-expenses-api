@@ -70,16 +70,33 @@ public class ExpensesGroupServiceImpl implements ExpensesGroupService {
 
         ExpensesGroupEntity expensesGroupEntity = this.expensesGroupRepository
                 .findByExpensesGroupId(groupId)
-                .orElseThrow(() -> new EntityNotFoundException("Expenses Groupd not found."));
+                .orElseThrow(() -> new EntityNotFoundException("Expenses Group not found."));
 
 
         if (!userId.equals(expensesGroupEntity.getUserId())) {
-            throw new AccessDeniedException("You don't have permission to delete this expenses group.");
+            throw new AccessDeniedException("You don't have permission to update this expenses group.");
         }
 
         expensesGroupEntity.setTitle(expensesGroupDto.getTitle());
         expensesGroupEntity.setDescription(expensesGroupDto.getDescription());
 
         this.expensesGroupRepository.save(expensesGroupEntity);
+    }
+
+    @Override
+    public void deleteExpensesGroup(String groupId) {
+
+        String userId = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        ExpensesGroupEntity expensesGroupEntity = this.expensesGroupRepository
+                .findByExpensesGroupId(groupId)
+                .orElseThrow(() -> new EntityNotFoundException("Expenses group not found."));
+
+        if (!userId.equals(expensesGroupEntity.getUserId())) {
+            throw new AccessDeniedException("You don't have permission to delete this expenses group.");
+        }
+
+        this.expensesGroupRepository.delete(expensesGroupEntity);
+
     }
 }
