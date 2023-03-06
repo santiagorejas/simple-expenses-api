@@ -1,7 +1,10 @@
 package com.simpleexpenses.demo.service.impl;
 
 import com.simpleexpenses.demo.dto.ExpensesGroupDto;
+import com.simpleexpenses.demo.exceptions.AccessDeniedException;
+import com.simpleexpenses.demo.exceptions.EntityNotFoundException;
 import com.simpleexpenses.demo.model.entity.ExpensesGroupEntity;
+import com.simpleexpenses.demo.model.request.ExpensesGroupModelRequest;
 import com.simpleexpenses.demo.repository.ExpensesGroupRepository;
 import com.simpleexpenses.demo.service.ExpensesGroupService;
 import lombok.RequiredArgsConstructor;
@@ -10,8 +13,10 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 
+import javax.swing.text.html.parser.Entity;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -45,7 +50,9 @@ public class ExpensesGroupServiceImpl implements ExpensesGroupService {
 
         String userId = SecurityContextHolder.getContext().getAuthentication().getName();
 
-        List<ExpensesGroupEntity> expensesGroupEntities = this.expensesGroupRepository.findAllByUserId(userId);
+        List<ExpensesGroupEntity> expensesGroupEntities = this.expensesGroupRepository
+                .findAllByUserId(userId)
+                .orElseThrow();
 
         ModelMapper modelMapper = new ModelMapper();
 
@@ -54,5 +61,25 @@ public class ExpensesGroupServiceImpl implements ExpensesGroupService {
         ).collect(Collectors.toList());
 
         return expensesGroupDtoList;
+    }
+
+    @Override
+    public void updateExpensesGroup(String groupId, ExpensesGroupDto expensesGroupDto) {
+
+        String userId = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        ExpensesGroupEntity expensesGroupEntity = this.expensesGroupRepository
+                .findByExpensesGroupId(groupId)
+                .orElseThrow(() -> new EntityNotFoundException("Expenses Groupd not found."));
+
+
+        if (!userId.equals(expensesGroupEntity.getUserId())) {
+            throw new AccessDeniedException("You don't have permission to delete this expenses group.");
+        }
+
+        expensesGroupEntity.setTitle(expensesGroupDto.getTitle());
+        expensesGroupEntity.setDescription(expensesGroupDto.getDescription());
+
+        this.expensesGroupRepository.save(expensesGroupEntity);
     }
 }

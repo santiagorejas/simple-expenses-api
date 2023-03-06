@@ -3,6 +3,7 @@ package com.simpleexpenses.demo.controller;
 import com.simpleexpenses.demo.dto.ExpensesGroupDto;
 import com.simpleexpenses.demo.model.request.ExpensesGroupModelRequest;
 import com.simpleexpenses.demo.model.response.ExpensesGroupResponse;
+import com.simpleexpenses.demo.model.response.MessageResponse;
 import com.simpleexpenses.demo.service.ExpensesGroupService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -48,13 +49,20 @@ public class ExpensesGroupController {
     }
 
     @GetMapping("/{groupId}")
-    public ResponseEntity<?> getExpensesGroup(@PathVariable String groupId) {
+    public ResponseEntity<ExpensesGroupResponse> getExpensesGroup(@PathVariable String groupId) {
         return null;
     }
 
     @PutMapping("/{groupId}")
-    public ResponseEntity<?> updateExpensesGroup(@PathVariable String groupId) {
-        return null;
+    public ResponseEntity<MessageResponse> updateExpensesGroup(@PathVariable String groupId,
+                                                               @RequestBody ExpensesGroupModelRequest expensesGroup) {
+
+        ModelMapper modelMapper = new ModelMapper();
+        ExpensesGroupDto expensesGroupDto = modelMapper.map(expensesGroup, ExpensesGroupDto.class);
+
+        this.expensesGroupService.updateExpensesGroup(groupId, expensesGroupDto);
+
+        return ResponseEntity.ok(new MessageResponse("Expenses group updated successfully."));
     }
 
     @DeleteMapping("/{groupId}")
