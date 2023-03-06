@@ -10,6 +10,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @RestController
 @RequestMapping("/api/v1/expenses-groups")
 @RequiredArgsConstructor
@@ -31,8 +34,17 @@ public class ExpensesGroupController {
     }
 
     @GetMapping
-    public ResponseEntity<?> getExpensesGroups() {
-        return null;
+    public ResponseEntity<List<ExpensesGroupResponse>> getExpensesGroups() {
+
+        List<ExpensesGroupDto> expensesGroups = this.expensesGroupService.getExpensesGroups();
+
+        ModelMapper modelMapper = new ModelMapper();
+        List<ExpensesGroupResponse> response = expensesGroups.stream().map(expensesGroupDto ->
+                    modelMapper.map(expensesGroupDto, ExpensesGroupResponse.class)
+                ).collect(Collectors.toList());
+
+
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{groupId}")

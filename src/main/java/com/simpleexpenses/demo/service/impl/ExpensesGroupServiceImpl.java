@@ -11,7 +11,9 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -36,5 +38,21 @@ public class ExpensesGroupServiceImpl implements ExpensesGroupService {
         ExpensesGroupDto createdExpensesGroupDto = modelMapper.map(createdExpensesGroupEntity, ExpensesGroupDto.class);
 
         return createdExpensesGroupDto;
+    }
+
+    @Override
+    public List<ExpensesGroupDto> getExpensesGroups() {
+
+        String userId = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        List<ExpensesGroupEntity> expensesGroupEntities = this.expensesGroupRepository.findAllByUserId(userId);
+
+        ModelMapper modelMapper = new ModelMapper();
+
+        List<ExpensesGroupDto> expensesGroupDtoList = expensesGroupEntities.stream().map(userEntity ->
+            modelMapper.map(userEntity, ExpensesGroupDto.class)
+        ).collect(Collectors.toList());
+
+        return expensesGroupDtoList;
     }
 }
