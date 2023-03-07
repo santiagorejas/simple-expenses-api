@@ -5,6 +5,7 @@ import lombok.*;
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
 
 @Getter
 @Setter
@@ -36,5 +37,8 @@ public class ExpenseEntity {
     @ManyToOne
     @JoinColumn(name = "expenses_group_id", nullable = false)
     private ExpensesGroupEntity expensesGroup;
+
+    @ManyToMany(fetch = FetchType.EAGER, mappedBy = "expenses")
+    private List<CategoryEntity> categories;
 
 }
