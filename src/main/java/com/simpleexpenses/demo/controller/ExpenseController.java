@@ -66,8 +66,13 @@ public class ExpenseController {
     }
 
     @DeleteMapping("/{expenseId}/categories/{categoryId}")
-    public ResponseEntity<MessageResponse> removeCategory() {
-        return null;
+    public ResponseEntity<MessageResponse> removeCategory(
+            @PathVariable String categoryId,
+            @PathVariable String expenseId) {
+
+        this.expenseService.removeCategory(categoryId, expenseId);
+
+        return ResponseEntity.ok(new MessageResponse("Category removed successfully."));
     }
 
 }

@@ -131,4 +131,24 @@ public class ExpenseServiceImpl implements ExpenseService {
         }
 
     }
+
+    @Override
+    public void removeCategory(String categoryId, String expenseId) {
+
+        ExpenseEntity expenseEntity = this.expenseRepository
+                .findByExpenseId(expenseId)
+                .orElseThrow(() -> new EntityNotFoundException("Expense doesn't exist."));
+
+        checkExpenseAccess(expenseEntity);
+
+        CategoryEntity categoryEntity = this.categoryRepository
+                .findByCategoryId(categoryId)
+                .orElseThrow(() -> new EntityNotFoundException("Category doesn't exist."));
+
+        if (expenseEntity.getCategories().contains(categoryEntity)) {
+            expenseEntity.getCategories().remove(categoryEntity);
+            this.expenseRepository.save(expenseEntity);
+        }
+
+    }
 }

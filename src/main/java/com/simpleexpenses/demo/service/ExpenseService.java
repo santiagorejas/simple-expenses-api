@@ -10,4 +10,6 @@ public interface ExpenseService {
     void deleteExpense(String expenseId);
 
     void addCategory(String categoryId, String expenseId);
+
+    void removeCategory(String categoryId, String expenseId);
 }
