@@ -1,5 +1,6 @@
 package com.simpleexpenses.demo.controller;
 
+import com.simpleexpenses.demo.dto.ExpenseDto;
 import com.simpleexpenses.demo.dto.ExpensesGroupDto;
 import com.simpleexpenses.demo.model.request.ExpensesGroupRequest;
 import com.simpleexpenses.demo.model.response.ExpensesGroupResponse;
@@ -54,15 +55,17 @@ public class ExpensesGroupController {
     }
 
     @PutMapping("/{groupId}")
-    public ResponseEntity<MessageResponse> updateExpensesGroup(@PathVariable String groupId,
+    public ResponseEntity<ExpensesGroupResponse> updateExpensesGroup(@PathVariable String groupId,
                                                                @RequestBody ExpensesGroupRequest expensesGroup) {
 
         ModelMapper modelMapper = new ModelMapper();
         ExpensesGroupDto expensesGroupDto = modelMapper.map(expensesGroup, ExpensesGroupDto.class);
 
-        this.expensesGroupService.updateExpensesGroup(groupId, expensesGroupDto);
+        ExpensesGroupDto updatedExpensesGroupDto = this.expensesGroupService.updateExpensesGroup(groupId, expensesGroupDto);
 
-        return ResponseEntity.ok(new MessageResponse("Expenses group updated successfully."));
+        ExpensesGroupResponse expensesGroupResponse = modelMapper.map(updatedExpensesGroupDto, ExpensesGroupResponse.class);
+
+        return ResponseEntity.ok(expensesGroupResponse);
     }
 
     @DeleteMapping("/{groupId}")

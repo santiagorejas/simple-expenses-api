@@ -10,7 +10,7 @@ public interface ExpensesGroupService {
 
     List<ExpensesGroupDto> getExpensesGroups();
 
-    void updateExpensesGroup(String groupId, ExpensesGroupDto expensesGroupDto);
+    ExpensesGroupDto updateExpensesGroup(String groupId, ExpensesGroupDto expensesGroupDto);
 
     void deleteExpensesGroup(String groupId);
 }

@@ -61,7 +61,7 @@ public class ExpensesGroupServiceImpl implements ExpensesGroupService {
     }
 
     @Override
-    public void updateExpensesGroup(String groupId, ExpensesGroupDto expensesGroupDto) {
+    public ExpensesGroupDto updateExpensesGroup(String groupId, ExpensesGroupDto expensesGroupDto) {
 
         String userId = SecurityContextHolder.getContext().getAuthentication().getName();
 
@@ -77,7 +77,13 @@ public class ExpensesGroupServiceImpl implements ExpensesGroupService {
         expensesGroupEntity.setTitle(expensesGroupDto.getTitle());
         expensesGroupEntity.setDescription(expensesGroupDto.getDescription());
 
-        this.expensesGroupRepository.save(expensesGroupEntity);
+        ExpensesGroupEntity storedExpensesGroupEntity = this.expensesGroupRepository.save(expensesGroupEntity);
+
+        ModelMapper modelMapper = new ModelMapper();
+
+        ExpensesGroupDto storedExpensesGroupDto = modelMapper.map(storedExpensesGroupEntity, ExpensesGroupDto.class);
+
+        return storedExpensesGroupDto;
     }
 
     @Override
