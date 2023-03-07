@@ -5,6 +5,7 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
 
 @Getter
 @Setter
@@ -17,5 +18,5 @@ public class ExpenseDto {
     private String description;
     private BigDecimal amount;
     private Date date;
-
+    private List<CategoryDto> categories;
 }
