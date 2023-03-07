@@ -3,6 +3,7 @@ package com.simpleexpenses.demo.controller;
 import com.simpleexpenses.demo.dto.CategoryDto;
 import com.simpleexpenses.demo.model.request.CategoryRequest;
 import com.simpleexpenses.demo.model.response.CategoryResponse;
+import com.simpleexpenses.demo.model.response.MessageResponse;
 import com.simpleexpenses.demo.service.CategoryService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -60,9 +61,12 @@ public class CategoryController {
         return ResponseEntity.ok(updatedCategoryResponse);
     }
 
-    @DeleteMapping
-    public ResponseEntity deleteCategory() {
-        return null;
+    @DeleteMapping("/{categoryId}")
+    public ResponseEntity<MessageResponse> deleteCategory(@PathVariable String categoryId) {
+
+        this.categoryService.deleteCategory(categoryId);
+
+        return ResponseEntity.ok(new MessageResponse("Category deleted successfully!"));
     }
 
 

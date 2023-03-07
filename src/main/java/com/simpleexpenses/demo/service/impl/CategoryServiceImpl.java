@@ -78,4 +78,20 @@ public class CategoryServiceImpl implements CategoryService {
 
         return updatedCategoryDto;
     }
+
+    @Override
+    public void deleteCategory(String categoryId) {
+
+        CategoryEntity categoryEntity = this.categoryRepository
+                .findByCategoryId(categoryId)
+                .orElseThrow(() -> new EntityNotFoundException("Category doesn't exist."));
+
+        String userId = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        if (!userId.equals(categoryEntity.getUserId())) {
+            throw new AccessDeniedException("You don't own this category");
+        }
+
+        this.categoryRepository.delete(categoryEntity);
+    }
 }
