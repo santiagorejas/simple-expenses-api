@@ -9,7 +9,10 @@ import org.modelmapper.ModelMapper;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -30,5 +33,23 @@ public class CategoryServiceImpl implements CategoryService {
         CategoryDto storedCategoryDto = modelMapper.map(storedCategoryEntity, CategoryDto.class);
 
         return storedCategoryDto;
+    }
+
+    @Override
+    public List<CategoryDto> getCategories() {
+
+        String userId = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        List<CategoryEntity> categories = this.categoryRepository
+                .findAllByUserId(userId)
+                .orElse(new ArrayList<CategoryEntity>());
+
+        ModelMapper modelMapper = new ModelMapper();
+        List<CategoryDto> categoriesDto =  categories
+                .stream()
+                .map(categoryEntity -> modelMapper.map(categoryEntity, CategoryDto.class))
+                .collect(Collectors.toList());
+
+        return categoriesDto;
     }
 }

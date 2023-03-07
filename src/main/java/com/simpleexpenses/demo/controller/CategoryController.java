@@ -9,6 +9,9 @@ import org.modelmapper.ModelMapper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @RestController
 @RequestMapping("/api/v1/categories")
 @RequiredArgsConstructor
@@ -31,7 +34,16 @@ public class CategoryController {
 
     @GetMapping
     public ResponseEntity getCategories() {
-        return null;
+
+        List<CategoryDto> categoriesDto = this.categoryService.getCategories();
+
+        ModelMapper modelMapper = new ModelMapper();
+        List<CategoryResponse> categoriesResponse = categoriesDto
+                .stream()
+                .map(categoryDto -> modelMapper.map(categoryDto, CategoryResponse.class))
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(categoriesResponse);
     }
 
     @PutMapping
