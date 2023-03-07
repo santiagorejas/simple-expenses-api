@@ -33,7 +33,7 @@ public class ExpensesGroupEntity {
     @Column(nullable = false)
     private Date createdAt;
 
-    @OneToMany(mappedBy = "expensesGroup" , cascade = {CascadeType.ALL})
+    @OneToMany(mappedBy = "expensesGroup" , cascade = {CascadeType.ALL}, fetch = FetchType.LAZY)
     private List<ExpenseEntity> expenses;
 
 }

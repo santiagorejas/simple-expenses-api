@@ -3,6 +3,7 @@ package com.simpleexpenses.demo.controller;
 import com.simpleexpenses.demo.dto.ExpenseDto;
 import com.simpleexpenses.demo.dto.ExpensesGroupDto;
 import com.simpleexpenses.demo.model.request.ExpensesGroupRequest;
+import com.simpleexpenses.demo.model.response.ExpensesGroupListItemResponse;
 import com.simpleexpenses.demo.model.response.ExpensesGroupResponse;
 import com.simpleexpenses.demo.model.response.MessageResponse;
 import com.simpleexpenses.demo.service.ExpensesGroupService;
@@ -36,13 +37,13 @@ public class ExpensesGroupController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ExpensesGroupResponse>> getExpensesGroups() {
+    public ResponseEntity<List<ExpensesGroupListItemResponse>> getExpensesGroups() {
 
         List<ExpensesGroupDto> expensesGroups = this.expensesGroupService.getExpensesGroups();
 
         ModelMapper modelMapper = new ModelMapper();
-        List<ExpensesGroupResponse> response = expensesGroups.stream().map(expensesGroupDto ->
-                    modelMapper.map(expensesGroupDto, ExpensesGroupResponse.class)
+        List<ExpensesGroupListItemResponse> response = expensesGroups.stream().map(expensesGroupDto ->
+                    modelMapper.map(expensesGroupDto, ExpensesGroupListItemResponse.class)
                 ).collect(Collectors.toList());
 
 
@@ -51,7 +52,13 @@ public class ExpensesGroupController {
 
     @GetMapping("/{groupId}")
     public ResponseEntity<ExpensesGroupResponse> getExpensesGroup(@PathVariable String groupId) {
-        return null;
+
+        ExpensesGroupDto expensesGroupDto = this.expensesGroupService.getExpensesGroup(groupId);
+
+        ModelMapper modelMapper = new ModelMapper();
+        ExpensesGroupResponse expensesGroupResponse = modelMapper.map(expensesGroupDto, ExpensesGroupResponse.class);
+
+        return ResponseEntity.ok(expensesGroupResponse);
     }
 
     @PutMapping("/{groupId}")

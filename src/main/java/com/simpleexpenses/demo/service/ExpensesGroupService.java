@@ -13,4 +13,6 @@ public interface ExpensesGroupService {
     ExpensesGroupDto updateExpensesGroup(String groupId, ExpensesGroupDto expensesGroupDto);
 
     void deleteExpensesGroup(String groupId);
+
+    ExpensesGroupDto getExpensesGroup(String groupId);
 }

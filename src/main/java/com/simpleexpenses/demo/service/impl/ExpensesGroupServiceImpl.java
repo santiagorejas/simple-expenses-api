@@ -8,6 +8,7 @@ import com.simpleexpenses.demo.repository.ExpensesGroupRepository;
 import com.simpleexpenses.demo.service.ExpensesGroupService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
@@ -101,5 +102,20 @@ public class ExpensesGroupServiceImpl implements ExpensesGroupService {
 
         this.expensesGroupRepository.delete(expensesGroupEntity);
 
+    }
+
+    @Override
+    public ExpensesGroupDto getExpensesGroup(String groupId) {
+
+        ExpensesGroupEntity expensesGroup = this.expensesGroupRepository
+                .findByExpensesGroupIdPopulated(groupId)
+                .orElseThrow();
+
+        ModelMapper modelMapper = new ModelMapper();
+        modelMapper.getConfiguration()
+                .setMatchingStrategy(MatchingStrategies.STRICT);
+        ExpensesGroupDto expensesGroupDto = modelMapper.map(expensesGroup, ExpensesGroupDto.class);
+
+        return expensesGroupDto;
     }
 }
