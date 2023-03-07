@@ -46,9 +46,18 @@ public class CategoryController {
         return ResponseEntity.ok(categoriesResponse);
     }
 
-    @PutMapping
-    public ResponseEntity updateCategory() {
-        return null;
+    @PutMapping("/{categoryId}")
+    public ResponseEntity updateCategory(
+            @PathVariable String categoryId,
+            @RequestBody CategoryRequest category) {
+
+        ModelMapper modelMapper = new ModelMapper();
+        CategoryDto categoryDto = modelMapper.map(category, CategoryDto.class);
+
+        CategoryDto updatedCategoryDto = this.categoryService.updateCategory(categoryId, categoryDto);
+        CategoryResponse updatedCategoryResponse = modelMapper.map(updatedCategoryDto, CategoryResponse.class);
+
+        return ResponseEntity.ok(updatedCategoryResponse);
     }
 
     @DeleteMapping

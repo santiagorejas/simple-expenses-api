@@ -1,6 +1,8 @@
 package com.simpleexpenses.demo.service.impl;
 
 import com.simpleexpenses.demo.dto.CategoryDto;
+import com.simpleexpenses.demo.exceptions.AccessDeniedException;
+import com.simpleexpenses.demo.exceptions.EntityNotFoundException;
 import com.simpleexpenses.demo.model.entity.CategoryEntity;
 import com.simpleexpenses.demo.repository.CategoryRepository;
 import com.simpleexpenses.demo.service.CategoryService;
@@ -51,5 +53,29 @@ public class CategoryServiceImpl implements CategoryService {
                 .collect(Collectors.toList());
 
         return categoriesDto;
+    }
+
+    @Override
+    public CategoryDto updateCategory(String categoryId, CategoryDto categoryDto) {
+
+        CategoryEntity categoryEntity = this.categoryRepository
+                .findByCategoryId(categoryId)
+                .orElseThrow(() -> new EntityNotFoundException("Category doesn't exist."));
+
+        String userId =  SecurityContextHolder.getContext().getAuthentication().getName();
+
+        if (!userId.equals(categoryEntity.getUserId())) {
+            throw new AccessDeniedException("You don't own this category.");
+        }
+
+        categoryEntity.setTitle(categoryDto.getTitle());
+        categoryEntity.setColor(categoryDto.getColor());
+
+        CategoryEntity updatedCategoryEntity = this.categoryRepository.save(categoryEntity);
+
+        ModelMapper modelMapper = new ModelMapper();
+        CategoryDto updatedCategoryDto = modelMapper.map(updatedCategoryEntity, CategoryDto.class);
+
+        return updatedCategoryDto;
     }
 }
