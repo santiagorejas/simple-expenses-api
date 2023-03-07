@@ -34,6 +34,7 @@ public class ExpenseEntity {
     private Date date;
 
     @ManyToOne
+    @JoinColumn(name = "expenses_group_id", nullable = false)
     private ExpensesGroupEntity expensesGroup;
 
 }

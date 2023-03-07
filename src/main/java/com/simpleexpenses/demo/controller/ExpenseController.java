@@ -33,8 +33,17 @@ public class ExpenseController {
     }
 
     @PutMapping("/{expenseId}")
-    public ResponseEntity<?> updateExpense(@PathVariable String expenseId) {
-        return null;
+    public ResponseEntity<ExpenseResponse> updateExpense(@PathVariable String expenseId,
+                                                         @RequestBody ExpenseRequest expense) {
+
+        ModelMapper modelMapper = new ModelMapper();
+        ExpenseDto expenseDto = modelMapper.map(expense, ExpenseDto.class);
+
+        ExpenseDto updatedExpenseDto = this.expenseService.updateExpense(expenseId, expenseDto);
+
+        ExpenseResponse expenseResponse = modelMapper.map(updatedExpenseDto, ExpenseResponse.class);
+
+        return ResponseEntity.ok(expenseResponse);
     }
 
     @DeleteMapping("/{expenseId}")

@@ -4,4 +4,6 @@ import com.simpleexpenses.demo.dto.ExpenseDto;
 
 public interface ExpenseService {
     ExpenseDto createExpense(ExpenseDto expenseDto);
+
+    ExpenseDto updateExpense(String expenseId, ExpenseDto expenseDto);
 }
