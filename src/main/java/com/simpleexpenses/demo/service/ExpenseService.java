@@ -8,4 +8,6 @@ public interface ExpenseService {
     ExpenseDto updateExpense(String expenseId, ExpenseDto expenseDto);
 
     void deleteExpense(String expenseId);
+
+    void addCategory(String categoryId, String expenseId);
 }

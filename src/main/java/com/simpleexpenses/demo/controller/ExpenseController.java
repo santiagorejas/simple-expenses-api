@@ -55,4 +55,19 @@ public class ExpenseController {
         return ResponseEntity.ok(new MessageResponse("Expense deleted successfully."));
     }
 
+    @PostMapping("/{expenseId}/categories/{categoryId}")
+    public ResponseEntity<MessageResponse> addCategory(
+            @PathVariable String categoryId,
+            @PathVariable String expenseId) {
+
+        this.expenseService.addCategory(categoryId, expenseId);
+
+        return ResponseEntity.ok(new MessageResponse("Category added successfully."));
+    }
+
+    @DeleteMapping("/{expenseId}/categories/{categoryId}")
+    public ResponseEntity<MessageResponse> removeCategory() {
+        return null;
+    }
+
 }
