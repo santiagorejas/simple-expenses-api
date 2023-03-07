@@ -6,4 +6,6 @@ public interface ExpenseService {
     ExpenseDto createExpense(ExpenseDto expenseDto);
 
     ExpenseDto updateExpense(String expenseId, ExpenseDto expenseDto);
+
+    void deleteExpense(String expenseId);
 }

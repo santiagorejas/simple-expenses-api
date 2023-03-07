@@ -3,6 +3,7 @@ package com.simpleexpenses.demo.controller;
 import com.simpleexpenses.demo.dto.ExpenseDto;
 import com.simpleexpenses.demo.model.request.ExpenseRequest;
 import com.simpleexpenses.demo.model.response.ExpenseResponse;
+import com.simpleexpenses.demo.model.response.MessageResponse;
 import com.simpleexpenses.demo.service.ExpenseService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -47,8 +48,11 @@ public class ExpenseController {
     }
 
     @DeleteMapping("/{expenseId}")
-    public ResponseEntity<?> deleteExpense(@PathVariable String expenseId) {
-        return null;
+    public ResponseEntity<MessageResponse> deleteExpense(@PathVariable String expenseId) {
+
+        this.expenseService.deleteExpense(expenseId);
+
+        return ResponseEntity.ok(new MessageResponse("Expense deleted successfully."));
     }
 
 }

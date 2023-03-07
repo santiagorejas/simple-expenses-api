@@ -52,12 +52,7 @@ public class ExpenseServiceImpl implements ExpenseService {
         return storedExpenseDto;
     }
 
-    @Override
-    public ExpenseDto updateExpense(String expenseId, ExpenseDto expenseDto) {
-
-        ExpenseEntity expenseEntity = this.expenseRepository.findByExpenseId(expenseId)
-                .orElseThrow(()  -> new EntityNotFoundException("Expense doesn't exist."));
-
+    private void checkExpenseAcces(ExpenseEntity expenseEntity) {
         ExpensesGroupEntity expensesGroup = this.expensesGroupRepository
                 .findByExpensesGroupId(expenseEntity.getExpensesGroup().getExpensesGroupId())
                 .orElseThrow(() -> new EntityNotFoundException("Expenses group doesn't exist."));
@@ -67,6 +62,15 @@ public class ExpenseServiceImpl implements ExpenseService {
         if (!expensesGroup.getUserId().equals(userId)) {
             throw new AccessDeniedException("You don't own this expenses group.");
         }
+    }
+
+    @Override
+    public ExpenseDto updateExpense(String expenseId, ExpenseDto expenseDto) {
+
+        ExpenseEntity expenseEntity = this.expenseRepository.findByExpenseId(expenseId)
+                .orElseThrow(()  -> new EntityNotFoundException("Expense doesn't exist."));
+
+        checkExpenseAcces(expenseEntity);
 
         ModelMapper modelMapper = new ModelMapper();
 
@@ -83,6 +87,18 @@ public class ExpenseServiceImpl implements ExpenseService {
         ExpenseDto updatedExpenseDto = modelMapper.map(storedExpenseEntity, ExpenseDto.class);
 
         return updatedExpenseDto;
+
+    }
+
+    @Override
+    public void deleteExpense(String expenseId) {
+
+        ExpenseEntity expenseEntity = this.expenseRepository.findByExpenseId(expenseId)
+                .orElseThrow(()  -> new EntityNotFoundException("Expense doesn't exist."));
+
+        checkExpenseAcces(expenseEntity);
+
+        this.expenseRepository.delete(expenseEntity);
 
     }
 }
