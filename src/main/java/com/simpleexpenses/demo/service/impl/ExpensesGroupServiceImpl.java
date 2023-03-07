@@ -4,7 +4,6 @@ import com.simpleexpenses.demo.dto.ExpensesGroupDto;
 import com.simpleexpenses.demo.exceptions.AccessDeniedException;
 import com.simpleexpenses.demo.exceptions.EntityNotFoundException;
 import com.simpleexpenses.demo.model.entity.ExpensesGroupEntity;
-import com.simpleexpenses.demo.model.request.ExpensesGroupModelRequest;
 import com.simpleexpenses.demo.repository.ExpensesGroupRepository;
 import com.simpleexpenses.demo.service.ExpensesGroupService;
 import lombok.RequiredArgsConstructor;
@@ -13,10 +12,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 
-import javax.swing.text.html.parser.Entity;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 

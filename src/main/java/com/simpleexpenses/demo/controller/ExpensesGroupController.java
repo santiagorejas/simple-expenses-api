@@ -1,7 +1,7 @@
 package com.simpleexpenses.demo.controller;
 
 import com.simpleexpenses.demo.dto.ExpensesGroupDto;
-import com.simpleexpenses.demo.model.request.ExpensesGroupModelRequest;
+import com.simpleexpenses.demo.model.request.ExpensesGroupRequest;
 import com.simpleexpenses.demo.model.response.ExpensesGroupResponse;
 import com.simpleexpenses.demo.model.response.MessageResponse;
 import com.simpleexpenses.demo.service.ExpensesGroupService;
@@ -22,7 +22,7 @@ public class ExpensesGroupController {
     private final ExpensesGroupService expensesGroupService;
 
     @PostMapping
-    public ResponseEntity<ExpensesGroupResponse> createExpensesGroup(@RequestBody ExpensesGroupModelRequest expensesGroup) {
+    public ResponseEntity<ExpensesGroupResponse> createExpensesGroup(@RequestBody ExpensesGroupRequest expensesGroup) {
 
         ModelMapper modelMapper = new ModelMapper();
         ExpensesGroupDto expensesGroupDto = modelMapper.map(expensesGroup, ExpensesGroupDto.class);
@@ -55,7 +55,7 @@ public class ExpensesGroupController {
 
     @PutMapping("/{groupId}")
     public ResponseEntity<MessageResponse> updateExpensesGroup(@PathVariable String groupId,
-                                                               @RequestBody ExpensesGroupModelRequest expensesGroup) {
+                                                               @RequestBody ExpensesGroupRequest expensesGroup) {
 
         ModelMapper modelMapper = new ModelMapper();
         ExpensesGroupDto expensesGroupDto = modelMapper.map(expensesGroup, ExpensesGroupDto.class);

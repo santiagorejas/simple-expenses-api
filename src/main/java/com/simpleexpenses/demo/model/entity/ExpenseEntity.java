@@ -3,37 +3,37 @@ package com.simpleexpenses.demo.model.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.util.Date;
-import java.util.List;
 
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity(name = "expenses_groups")
-public class ExpensesGroupEntity {
+@Entity(name =" expenses")
+public class ExpenseEntity {
 
     @Id
     @GeneratedValue
     private Long id;
 
     @Column(length  = 36, nullable = false)
-    private String expensesGroupId;
-
-    @Column(length = 21, nullable = false)
-    private String userId;
+    private String expenseId;
 
     @Column(length = 120, nullable = false)
     private String title;
 
-    @Column(nullable = true)
+    @Column(nullable = false)
     private String description;
 
     @Column(nullable = false)
-    private Date createdAt;
+    private BigDecimal amount;
 
-    @OneToMany(mappedBy = "expensesGroup" , cascade = {CascadeType.ALL})
-    private List<ExpenseEntity> expenses;
+    @Column(nullable = false)
+    private Date date;
+
+    @ManyToOne
+    private ExpensesGroupEntity expensesGroup;
 
 }
