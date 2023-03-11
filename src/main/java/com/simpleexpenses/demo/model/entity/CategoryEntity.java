@@ -26,7 +26,7 @@ public class CategoryEntity {
     @Column(nullable = false, length = 30)
     private String title;
 
-    @Column(nullable = false, length = 6)
+    @Column(nullable = false, length = 7)
     private String color;
 
     @ManyToMany(fetch = FetchType.LAZY, mappedBy = "categories")
