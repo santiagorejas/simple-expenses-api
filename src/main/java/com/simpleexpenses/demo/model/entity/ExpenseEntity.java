@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -43,6 +44,6 @@ public class ExpenseEntity {
     @JoinTable(name = "expenses_categories",
             joinColumns = {@JoinColumn(name = "category_id")},
             inverseJoinColumns = {@JoinColumn(name = "expense_id")})
-    private List<CategoryEntity> categories;
+    private List<CategoryEntity> categories  = new ArrayList<>();
 
 }

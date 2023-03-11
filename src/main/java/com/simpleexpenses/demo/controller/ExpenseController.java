@@ -11,6 +11,9 @@ import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.lang.reflect.Type;
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/v1/expenses")
 @RequiredArgsConstructor
@@ -24,6 +27,7 @@ public class ExpenseController {
         ModelMapper modelMapper = new ModelMapper();
         modelMapper.getConfiguration()
                 .setMatchingStrategy(MatchingStrategies.STRICT);
+
         ExpenseDto expenseDto = modelMapper.map(expense, ExpenseDto.class);
 
         ExpenseDto createdExpenseDto = this.expenseService.createExpense(expenseDto);

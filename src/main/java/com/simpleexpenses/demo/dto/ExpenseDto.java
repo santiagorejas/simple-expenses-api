@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -18,5 +19,6 @@ public class ExpenseDto {
     private String description;
     private BigDecimal amount;
     private Date date;
-    private List<CategoryDto> categories;
+    private List<CategoryDto> categories = new ArrayList<>();
+    private List<String> categoriesId = new ArrayList<>();
 }

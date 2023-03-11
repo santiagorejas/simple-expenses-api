@@ -17,6 +17,6 @@ public class ExpenseResponse {
     private String description;
     private BigDecimal amount;
     private Date date;
-    private List<CategoryResponse> categories = new ArrayList<>();
+    private List<CategoryResponse> categories;
 
 }

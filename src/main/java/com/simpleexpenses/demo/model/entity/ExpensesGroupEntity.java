@@ -3,6 +3,7 @@ package com.simpleexpenses.demo.model.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -34,6 +35,6 @@ public class ExpensesGroupEntity {
     private Date createdAt;
 
     @OneToMany(mappedBy = "expensesGroup" , cascade = {CascadeType.ALL}, fetch = FetchType.LAZY)
-    private List<ExpenseEntity> expenses;
+    private List<ExpenseEntity> expenses = new ArrayList<>();
 
 }

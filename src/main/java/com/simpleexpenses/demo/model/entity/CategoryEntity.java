@@ -3,6 +3,7 @@ package com.simpleexpenses.demo.model.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -30,5 +31,5 @@ public class CategoryEntity {
     private String color;
 
     @ManyToMany(fetch = FetchType.LAZY, mappedBy = "categories")
-    private List<ExpenseEntity> expenses;
+    private List<ExpenseEntity> expenses = new ArrayList<>();
 }

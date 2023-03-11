@@ -17,6 +17,7 @@ import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -32,7 +33,7 @@ public class ExpenseServiceImpl implements ExpenseService {
 
         ExpensesGroupEntity expensesGroup = this.expensesGroupRepository
                 .findByExpensesGroupId(expenseDto.getExpensesGroupId())
-                .orElseThrow(() -> new EntityNotFoundException("Expenses group doesn't exist."));
+                .orElseThrow(() -> new EntityNotFoundException("Expenses group doesn't exist. Id provided: " + expenseDto.getExpensesGroupId()));
 
         String userId = SecurityContextHolder.getContext().getAuthentication().getName();
 
@@ -48,6 +49,17 @@ public class ExpenseServiceImpl implements ExpenseService {
         ExpenseEntity expenseEntity = modelMapper.map(expenseDto, ExpenseEntity.class);
         expenseEntity.setExpenseId(UUID.randomUUID().toString());
         expenseEntity.setExpensesGroup(expensesGroup);
+
+        List<CategoryEntity> categories = this.categoryRepository
+                .findAllByCategoryIdIn(expenseDto.getCategoriesId())
+                .orElseThrow(() -> new EntityNotFoundException("Category doesn't exist."));
+
+        for (CategoryEntity category: categories) {
+            if (!category.getUserId().equals(userId)) {
+                throw new AccessDeniedException("You don't own this category.");
+            }
+            expenseEntity.getCategories().add(category);
+        }
 
         ExpenseEntity storedExpenseEntity = this.expenseRepository.save(expenseEntity);
 
