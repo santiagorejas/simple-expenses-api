@@ -28,6 +28,22 @@ public class ExpenseServiceImpl implements ExpenseService {
     private final ExpenseRepository expenseRepository;
     private final CategoryRepository categoryRepository;
 
+    private void setExpensesCategories(ExpenseEntity expenseEntity, List<String> categoryId) {
+
+        String userId = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        List<CategoryEntity> categories = this.categoryRepository
+                .findAllByCategoryIdIn(categoryId)
+                .orElseThrow(() -> new EntityNotFoundException("Category doesn't exist."));
+
+        for (CategoryEntity category: categories) {
+            if (!category.getUserId().equals(userId)) {
+                throw new AccessDeniedException("You don't own this category.");
+            }
+            expenseEntity.getCategories().add(category);
+        }
+    }
+
     @Override
     public ExpenseDto createExpense(ExpenseDto expenseDto) {
 
@@ -50,16 +66,7 @@ public class ExpenseServiceImpl implements ExpenseService {
         expenseEntity.setExpenseId(UUID.randomUUID().toString());
         expenseEntity.setExpensesGroup(expensesGroup);
 
-        List<CategoryEntity> categories = this.categoryRepository
-                .findAllByCategoryIdIn(expenseDto.getCategoriesId())
-                .orElseThrow(() -> new EntityNotFoundException("Category doesn't exist."));
-
-        for (CategoryEntity category: categories) {
-            if (!category.getUserId().equals(userId)) {
-                throw new AccessDeniedException("You don't own this category.");
-            }
-            expenseEntity.getCategories().add(category);
-        }
+        setExpensesCategories(expenseEntity, expenseDto.getCategoriesId());
 
         ExpenseEntity storedExpenseEntity = this.expenseRepository.save(expenseEntity);
 
@@ -97,6 +104,9 @@ public class ExpenseServiceImpl implements ExpenseService {
         expenseEntity.setDescription(expenseDto.getDescription());
         expenseEntity.setAmount(expenseDto.getAmount());
         expenseEntity.setDate(expenseDto.getDate());
+
+        expenseEntity.getCategories().clear();
+        setExpensesCategories(expenseEntity, expenseDto.getCategoriesId());
 
         ExpenseEntity storedExpenseEntity = this.expenseRepository.save(expenseEntity);
 
