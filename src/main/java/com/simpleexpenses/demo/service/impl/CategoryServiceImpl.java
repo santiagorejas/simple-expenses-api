@@ -4,7 +4,9 @@ import com.simpleexpenses.demo.dto.CategoryDto;
 import com.simpleexpenses.demo.exceptions.AccessDeniedException;
 import com.simpleexpenses.demo.exceptions.EntityNotFoundException;
 import com.simpleexpenses.demo.model.entity.CategoryEntity;
+import com.simpleexpenses.demo.model.entity.ExpenseEntity;
 import com.simpleexpenses.demo.repository.CategoryRepository;
+import com.simpleexpenses.demo.repository.ExpenseRepository;
 import com.simpleexpenses.demo.service.CategoryService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -21,6 +23,7 @@ import java.util.stream.Collectors;
 public class CategoryServiceImpl implements CategoryService {
 
     private final CategoryRepository categoryRepository;
+    private final ExpenseRepository expenseRepository;
     @Override
     public CategoryDto createCategory(CategoryDto categoryDto) {
 
@@ -90,6 +93,11 @@ public class CategoryServiceImpl implements CategoryService {
 
         if (!userId.equals(categoryEntity.getUserId())) {
             throw new AccessDeniedException("You don't own this category");
+        }
+
+        for (ExpenseEntity expenseEntity: categoryEntity.getExpenses()) {
+            expenseEntity.getCategories().remove(categoryEntity);
+            this.expenseRepository.save(expenseEntity);
         }
 
         this.categoryRepository.delete(categoryEntity);
