@@ -2,17 +2,18 @@ package com.simpleexpenses.demo.controller;
 
 import com.simpleexpenses.demo.dto.ExpenseDto;
 import com.simpleexpenses.demo.dto.ExpensesGroupDto;
+import com.simpleexpenses.demo.dto.PagedDto;
 import com.simpleexpenses.demo.model.request.ExpensesGroupRequest;
-import com.simpleexpenses.demo.model.response.ExpensesGroupListItemResponse;
-import com.simpleexpenses.demo.model.response.ExpensesGroupResponse;
-import com.simpleexpenses.demo.model.response.MessageResponse;
+import com.simpleexpenses.demo.model.response.*;
 import com.simpleexpenses.demo.service.ExpensesGroupService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeToken;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.lang.reflect.Type;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -37,13 +38,13 @@ public class ExpensesGroupController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ExpensesGroupListItemResponse>> getExpensesGroups() {
+    public ResponseEntity<List<ExpensesGroupResponse>> getExpensesGroups() {
 
         List<ExpensesGroupDto> expensesGroups = this.expensesGroupService.getExpensesGroups();
 
         ModelMapper modelMapper = new ModelMapper();
-        List<ExpensesGroupListItemResponse> response = expensesGroups.stream().map(expensesGroupDto ->
-                    modelMapper.map(expensesGroupDto, ExpensesGroupListItemResponse.class)
+        List<ExpensesGroupResponse> response = expensesGroups.stream().map(expensesGroupDto ->
+                    modelMapper.map(expensesGroupDto, ExpensesGroupResponse.class)
                 ).collect(Collectors.toList());
 
 
@@ -59,6 +60,7 @@ public class ExpensesGroupController {
         ExpensesGroupResponse expensesGroupResponse = modelMapper.map(expensesGroupDto, ExpensesGroupResponse.class);
 
         return ResponseEntity.ok(expensesGroupResponse);
+
     }
 
     @PutMapping("/{groupId}")
@@ -81,6 +83,23 @@ public class ExpensesGroupController {
         this.expensesGroupService.deleteExpensesGroup(groupId);
 
         return ResponseEntity.ok(new MessageResponse("Expenses group deleted successfully."));
+    }
+
+
+    @GetMapping("/{groupId}/expenses")
+    public ResponseEntity<PagedResponse<ExpenseResponse>> getExpensesByGroupId(@PathVariable String groupId,
+                                                                                     @RequestParam(value = "page", defaultValue = "0") int page,
+                                                                                     @RequestParam(value = "size", defaultValue = "20") int size) {
+
+        PagedDto<ExpenseDto> pagedDto = this.expensesGroupService.getExpenses(groupId, page, size);
+
+        ModelMapper modelMapper = new ModelMapper();
+        Type mapType = new TypeToken<PagedResponse<ExpenseResponse>>() {}.getType();
+        PagedResponse<ExpenseResponse> expensesResponse = modelMapper.map(pagedDto, mapType);
+
+        return ResponseEntity.ok(expensesResponse);
+
+
     }
 
 
