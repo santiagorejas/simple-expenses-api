@@ -26,7 +26,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class ExpensesGroupServiceImplTest {
@@ -208,4 +208,49 @@ public class ExpensesGroupServiceImplTest {
         });
     }
 
+    @Test
+    final void testDeleteExpensesGroup() {
+
+        when(this.expensesGroupRepository.findByExpensesGroupId(expensesGroupEntity.getExpensesGroupId()))
+                .thenReturn(Optional.of(expensesGroupEntity));
+
+        this.expensesGroupService.deleteExpensesGroup(expensesGroupEntity.getExpensesGroupId());
+
+        verify(expensesGroupRepository, times(1)).delete(expensesGroupEntity);
+    }
+
+    @Test
+    final void testDeleteExpensesGroup_EntityNotFoundException() {
+
+        when(this.expensesGroupRepository.findByExpensesGroupId(expensesGroupEntity.getExpensesGroupId()))
+                .thenReturn(Optional.empty());
+
+        assertThrows(EntityNotFoundException.class, () -> {
+            this.expensesGroupService.deleteExpensesGroup(expensesGroupEntity.getExpensesGroupId());
+        });
+
+        verify(expensesGroupRepository, times(0)).delete(expensesGroupEntity);
+    }
+
+    @Test
+    final void testDeleteExpensesGroup_AccessDeniedException() {
+
+        ExpensesGroupEntity expensesGroup = ExpensesGroupEntity
+                .builder()
+                .expensesGroupId("groupId")
+                .title(title)
+                .description(description)
+                .userId("anotherUserId")
+                .build();
+
+        when(this.expensesGroupRepository.findByExpensesGroupId(expensesGroup.getExpensesGroupId()))
+                .thenReturn(Optional.of(expensesGroup));
+
+        assertThrows(AccessDeniedException.class, () -> {
+            this.expensesGroupService.deleteExpensesGroup(expensesGroup.getExpensesGroupId());
+        });
+
+        verify(expensesGroupRepository, times(0)).delete(expensesGroup);
+
+    }
 }
