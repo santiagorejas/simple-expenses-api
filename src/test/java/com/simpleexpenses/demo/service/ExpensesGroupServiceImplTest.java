@@ -1,6 +1,8 @@
 package com.simpleexpenses.demo.service;
 
+import com.simpleexpenses.demo.dto.ExpenseDto;
 import com.simpleexpenses.demo.dto.ExpensesGroupDto;
+import com.simpleexpenses.demo.dto.PagedDto;
 import com.simpleexpenses.demo.exceptions.AccessDeniedException;
 import com.simpleexpenses.demo.exceptions.EntityNotFoundException;
 import com.simpleexpenses.demo.model.entity.ExpenseEntity;
@@ -15,6 +17,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
@@ -251,6 +256,96 @@ public class ExpensesGroupServiceImplTest {
         });
 
         verify(expensesGroupRepository, times(0)).delete(expensesGroup);
+    }
 
+    @Test
+    final void testGetExpenses() {
+
+        ExpenseEntity exp1 = ExpenseEntity.builder()
+                .expenseId("id1")
+                .title("t1")
+                .description("d1")
+                .amount(new BigDecimal(10))
+                .build();
+        ExpenseEntity exp2 = ExpenseEntity.builder()
+                .expenseId("id2")
+                .title("t2")
+                .description("d2")
+                .amount(new BigDecimal(10))
+                .build();
+        ExpenseEntity exp3 = ExpenseEntity.builder()
+                .expenseId("id3")
+                .title("t3")
+                .description("d3")
+                .amount(new BigDecimal(10))
+                .build();
+
+        List<ExpenseEntity> expenseEntities = new ArrayList<>();
+        expenseEntities.add(exp1);
+        expenseEntities.add(exp2);
+        expenseEntities.add(exp3);
+
+        String groupId = "groupId";
+        int page = 0;
+        int size = 10;
+
+        when(this.expensesGroupRepository.findByExpensesGroupId(groupId))
+                .thenReturn(Optional.of(this.expensesGroupEntity));
+        when(this.expenseRepository.findAllByExpensesGroup_Id(this.expensesGroupEntity.getId(),  PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "date"))))
+                .thenReturn(Optional.of(new PageImpl<>(expenseEntities)));
+
+        PagedDto<ExpenseDto> pagedExpensesDto = this.expensesGroupService.getExpenses(groupId, page, size);
+
+        assertEquals(page, pagedExpensesDto.getPage());
+        assertEquals(1, pagedExpensesDto.getTotalPages());
+        assertEquals(3, pagedExpensesDto.getTotalElements());
+    }
+
+    @Test
+    final void testGetExpenses_EntityNotFoundException_ExpensesGroup() {
+
+        String groupId = "groupId";
+        int page = 0;
+        int size = 10;
+
+        when(this.expensesGroupRepository.findByExpensesGroupId(groupId))
+                .thenReturn(Optional.empty());
+
+        assertThrows(EntityNotFoundException.class, () -> {
+            PagedDto<ExpenseDto> pagedExpensesDto = this.expensesGroupService.getExpenses(groupId, page, size);
+        });
+    }
+
+    @Test
+    final void testGetExpenses_EntityNotFoundException_Expenses() {
+
+        String groupId = "groupId";
+        int page = 0;
+        int size = 10;
+
+        when(this.expensesGroupRepository.findByExpensesGroupId(groupId))
+                .thenReturn(Optional.of(this.expensesGroupEntity));
+        when(this.expenseRepository.findAllByExpensesGroup_Id(this.expensesGroupEntity.getId(),  PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "date"))))
+                .thenReturn(Optional.empty());
+
+        assertThrows(EntityNotFoundException.class, () -> {
+            PagedDto<ExpenseDto> pagedExpensesDto = this.expensesGroupService.getExpenses(groupId, page, size);
+        });
+    }
+
+    @Test
+    final void testGetExpenses_AccessDeniedException() {
+
+        String groupId = "groupId";
+        int page = 0;
+        int size = 10;
+
+        this.expensesGroupEntity.setUserId("anotherUserId");
+        when(this.expensesGroupRepository.findByExpensesGroupId(groupId))
+                .thenReturn(Optional.of(this.expensesGroupEntity));
+
+        assertThrows(AccessDeniedException.class, () -> {
+            PagedDto<ExpenseDto> pagedExpensesDto = this.expensesGroupService.getExpenses(groupId, page, size);
+        });
     }
 }
