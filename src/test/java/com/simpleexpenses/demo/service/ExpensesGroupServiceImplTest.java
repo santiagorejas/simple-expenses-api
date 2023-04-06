@@ -86,8 +86,6 @@ public class ExpensesGroupServiceImplTest {
     @Test
     final void testGetExpensesGroup() {
 
-        String userId = "userid123";
-
         ExpensesGroupEntity exp1 = ExpensesGroupEntity.builder().title("Exp1 title").userId(userId).description("Description 1").build();
         ExpensesGroupEntity exp2 = ExpensesGroupEntity.builder().title("Exp2 title").userId(userId).description("Description 2").build();
         ExpensesGroupEntity exp3 = ExpensesGroupEntity.builder().title("Exp3 title").userId(userId).description("Description 3").build();
