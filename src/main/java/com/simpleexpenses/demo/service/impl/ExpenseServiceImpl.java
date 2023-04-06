@@ -17,6 +17,7 @@ import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
 
@@ -40,8 +41,8 @@ public class ExpenseServiceImpl implements ExpenseService {
             if (!category.getUserId().equals(userId)) {
                 throw new AccessDeniedException("You don't own this category.");
             }
-            expenseEntity.getCategories().add(category);
         }
+        expenseEntity.setCategories(new HashSet<>(categories));
     }
 
     @Override
