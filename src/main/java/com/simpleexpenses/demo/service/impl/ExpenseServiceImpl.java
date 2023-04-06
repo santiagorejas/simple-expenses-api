@@ -9,7 +9,6 @@ import com.simpleexpenses.demo.model.entity.ExpensesGroupEntity;
 import com.simpleexpenses.demo.repository.CategoryRepository;
 import com.simpleexpenses.demo.repository.ExpenseRepository;
 import com.simpleexpenses.demo.repository.ExpensesGroupRepository;
-import com.simpleexpenses.demo.service.CategoryService;
 import com.simpleexpenses.demo.service.ExpenseService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -126,52 +125,6 @@ public class ExpenseServiceImpl implements ExpenseService {
         checkExpenseAccess(expenseEntity);
 
         this.expenseRepository.delete(expenseEntity);
-
-    }
-
-    @Override
-    public void addCategory(String categoryId, String expenseId) {
-
-        ExpenseEntity expenseEntity = this.expenseRepository
-                .findByExpenseId(expenseId)
-                .orElseThrow(() -> new EntityNotFoundException("Expense doesn't exist."));
-
-        checkExpenseAccess(expenseEntity);
-
-        CategoryEntity categoryEntity = this.categoryRepository
-                .findByCategoryId(categoryId)
-                .orElseThrow(() -> new EntityNotFoundException("Category doesn't exist."));
-
-        String userId = SecurityContextHolder.getContext().getAuthentication().getName();
-
-        if (!categoryEntity.getUserId().equals(userId)) {
-            throw new AccessDeniedException("You can't use this category.");
-        }
-
-        if (!expenseEntity.getCategories().contains(categoryEntity)) {
-            expenseEntity.getCategories().add(categoryEntity);
-            this.expenseRepository.save(expenseEntity);
-        }
-
-    }
-
-    @Override
-    public void removeCategory(String categoryId, String expenseId) {
-
-        ExpenseEntity expenseEntity = this.expenseRepository
-                .findByExpenseId(expenseId)
-                .orElseThrow(() -> new EntityNotFoundException("Expense doesn't exist."));
-
-        checkExpenseAccess(expenseEntity);
-
-        CategoryEntity categoryEntity = this.categoryRepository
-                .findByCategoryId(categoryId)
-                .orElseThrow(() -> new EntityNotFoundException("Category doesn't exist."));
-
-        if (expenseEntity.getCategories().contains(categoryEntity)) {
-            expenseEntity.getCategories().remove(categoryEntity);
-            this.expenseRepository.save(expenseEntity);
-        }
 
     }
 }

@@ -11,8 +11,6 @@ import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.lang.reflect.Type;
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/expenses")
@@ -57,26 +55,6 @@ public class ExpenseController {
         this.expenseService.deleteExpense(expenseId);
 
         return ResponseEntity.ok(new MessageResponse("Expense deleted successfully."));
-    }
-
-    @PostMapping("/{expenseId}/categories/{categoryId}")
-    public ResponseEntity<MessageResponse> addCategory(
-            @PathVariable String categoryId,
-            @PathVariable String expenseId) {
-
-        this.expenseService.addCategory(categoryId, expenseId);
-
-        return ResponseEntity.ok(new MessageResponse("Category added successfully."));
-    }
-
-    @DeleteMapping("/{expenseId}/categories/{categoryId}")
-    public ResponseEntity<MessageResponse> removeCategory(
-            @PathVariable String categoryId,
-            @PathVariable String expenseId) {
-
-        this.expenseService.removeCategory(categoryId, expenseId);
-
-        return ResponseEntity.ok(new MessageResponse("Category removed successfully."));
     }
 
 }
