@@ -46,6 +46,8 @@ public class ExpenseServiceImplTest {
     CategoryRepository categoryRepository;
 
     private final String userId = "userId";
+    private BigDecimal amount = new BigDecimal(10);
+    private Date date = new Date();
 
     @BeforeEach
     void setUp() {
@@ -55,8 +57,6 @@ public class ExpenseServiceImplTest {
     }
 
     private ExpenseDto buildExpenseDto() {
-        BigDecimal amount = new BigDecimal(10);
-        Date date = new Date();
 
         return ExpenseDto
                 .builder()
@@ -102,6 +102,16 @@ public class ExpenseServiceImplTest {
         return categories;
     }
 
+    private ExpenseEntity buildExpenseEntity() {
+        return ExpenseEntity
+                .builder()
+                .title("title")
+                .description("description")
+                .amount(amount)
+                .date(date)
+                .build();
+    }
+
     private ExpensesGroupEntity buildExpensesGroupEntity() {
 
         return ExpensesGroupEntity
@@ -129,15 +139,9 @@ public class ExpenseServiceImplTest {
 
         ExpensesGroupEntity expensesGroupEntity = this.buildExpensesGroupEntity();
 
-        ExpenseEntity expenseEntity = ExpenseEntity
-                .builder()
-                .title("title")
-                .description("description")
-                .amount(expenseDto.getAmount())
-                .date(expenseDto.getDate())
-                .expensesGroup(expensesGroupEntity)
-                .categories(new HashSet<>(categories))
-                .build();
+        ExpenseEntity expenseEntity = this.buildExpenseEntity();
+        expenseEntity.setExpensesGroup(expensesGroupEntity);
+        expenseEntity.setCategories(new HashSet<>(categories));
 
         when(this.expensesGroupRepository.findByExpensesGroupId(expenseDto.getExpensesGroupId()))
                 .thenReturn(Optional.of(expensesGroupEntity));
@@ -241,6 +245,99 @@ public class ExpenseServiceImplTest {
 
         assertThrows(AccessDeniedException.class, () -> {
             this.expenseService.createExpense(expenseDto);
+        });
+
+        verify(this.expenseRepository, never()).save(any(ExpenseEntity.class));
+
+    }
+
+    @Test
+    final void testUpdateExpense() {
+
+        String expenseId = "expenseId";
+
+        List<CategoryEntity> categories = this.buildCategories();
+
+        ExpensesGroupEntity expensesGroupEntity = this.buildExpensesGroupEntity();
+
+        ExpenseEntity expenseEntity = this.buildExpenseEntity();
+        expenseEntity.setExpensesGroup(expensesGroupEntity);
+        expenseEntity.setCategories(new HashSet<>(categories));
+
+        String newTitle = "New title";
+        String newDescription = "New description";
+        BigDecimal newAmount = new BigDecimal(20);
+
+        ExpenseDto expenseDto = ExpenseDto
+                .builder()
+                .expenseId(expenseId)
+                .title(newTitle)
+                .description(newDescription)
+                .amount(newAmount)
+                .categories(new HashSet<>())
+                .build();
+
+        ExpenseEntity updatedExpenseEntity = ExpenseEntity
+                .builder()
+                .expenseId(expenseId)
+                .title(newTitle)
+                .description(newDescription)
+                .amount(newAmount)
+                .categories(new HashSet<>())
+                .build();
+
+        when(this.expenseRepository.findByExpenseId(expenseId))
+                .thenReturn(Optional.of(expenseEntity));
+        when(this.expenseRepository.save(expenseEntity))
+                .thenReturn(updatedExpenseEntity);
+        when(this.expensesGroupRepository.findByExpensesGroupId(expenseEntity.getExpensesGroup().getExpensesGroupId()))
+                .thenReturn(Optional.of(expensesGroupEntity));
+        when(this.categoryRepository.findAllByCategoryIdIn(expenseDto.getCategoriesId()))
+                .thenReturn(Optional.of(new ArrayList<>()));
+
+        ExpenseDto updatedExpenseDto = this.expenseService.updateExpense(expenseId, expenseDto);
+
+        assertEquals(expenseDto.getExpenseId(), updatedExpenseDto.getExpenseId());
+        assertEquals(expenseDto.getTitle(), updatedExpenseDto.getTitle());
+        assertEquals(expenseDto.getDescription(), updatedExpenseDto.getDescription());
+        assertEquals(expenseDto.getAmount(), updatedExpenseDto.getAmount());
+        assertEquals(expenseDto.getCategories(), updatedExpenseDto.getCategories());
+    }
+
+    @Test
+    final void testUpdateExpense_AccessDeniedException() {
+
+        String expenseId = "expenseId";
+
+        List<CategoryEntity> categories = this.buildCategories();
+
+        ExpensesGroupEntity expensesGroupEntity = this.buildExpensesGroupEntity();
+        expensesGroupEntity.setUserId("another" + userId);
+
+        ExpenseEntity expenseEntity = this.buildExpenseEntity();
+        expenseEntity.setExpensesGroup(expensesGroupEntity);
+        expenseEntity.setCategories(new HashSet<>(categories));
+
+        String newTitle = "New title";
+        String newDescription = "New description";
+        BigDecimal newAmount = new BigDecimal(20);
+
+        ExpenseDto expenseDto = ExpenseDto
+                .builder()
+                .expenseId(expenseId)
+                .title(newTitle)
+                .description(newDescription)
+                .amount(newAmount)
+                .categories(new HashSet<>())
+                .build();
+
+        when(this.expenseRepository.findByExpenseId(expenseId))
+                .thenReturn(Optional.of(expenseEntity));
+        when(this.expensesGroupRepository.findByExpensesGroupId(expenseEntity.getExpensesGroup().getExpensesGroupId()))
+                .thenReturn(Optional.of(expensesGroupEntity));
+
+        assertThrows(AccessDeniedException.class, () -> {
+            this.expenseService.updateExpense(expenseId, expenseDto);
         });
 
         verify(this.expenseRepository, never()).save(any(ExpenseEntity.class));
