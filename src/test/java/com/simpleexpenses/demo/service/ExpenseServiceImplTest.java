@@ -105,6 +105,7 @@ public class ExpenseServiceImplTest {
     private ExpenseEntity buildExpenseEntity() {
         return ExpenseEntity
                 .builder()
+                .expenseId("expenseId")
                 .title("title")
                 .description("description")
                 .amount(amount)
@@ -342,5 +343,59 @@ public class ExpenseServiceImplTest {
 
         verify(this.expenseRepository, never()).save(any(ExpenseEntity.class));
 
+    }
+
+    @Test
+    final void testDeleteExpense() {
+
+        ExpenseEntity expenseEntity = this.buildExpenseEntity();
+        expenseEntity.setExpensesGroup(this.buildExpensesGroupEntity());
+
+        when(this.expenseRepository.findByExpenseId(expenseEntity.getExpenseId()))
+                .thenReturn(Optional.of(expenseEntity));
+        when(this.expensesGroupRepository
+                .findByExpensesGroupId(expenseEntity.getExpensesGroup().getExpensesGroupId()))
+                .thenReturn(Optional.of(expenseEntity.getExpensesGroup()));
+
+        this.expenseService.deleteExpense(expenseEntity.getExpenseId());
+
+        verify(this.expenseRepository, times(1)).delete(expenseEntity);
+    }
+
+    @Test
+    final void testDeleteExpense_AccessDeniedException() {
+
+        ExpenseEntity expenseEntity = this.buildExpenseEntity();
+        ExpensesGroupEntity expensesGroupEntity = this.buildExpensesGroupEntity();
+        expensesGroupEntity.setUserId("another" + userId);
+        expenseEntity.setExpensesGroup(expensesGroupEntity);
+
+        when(this.expenseRepository.findByExpenseId(expenseEntity.getExpenseId()))
+                .thenReturn(Optional.of(expenseEntity));
+        when(this.expensesGroupRepository
+                .findByExpensesGroupId(expenseEntity.getExpensesGroup().getExpensesGroupId()))
+                .thenReturn(Optional.of(expenseEntity.getExpensesGroup()));
+
+
+        assertThrows(AccessDeniedException.class, () -> {
+            this.expenseService.deleteExpense(expenseEntity.getExpenseId());
+        });
+
+        verify(this.expenseRepository, never()).delete(expenseEntity);
+    }
+
+    @Test
+    final void testDeleteExpense_EntityNotFoundException() {
+
+        ExpenseEntity expenseEntity = this.buildExpenseEntity();
+
+        when(this.expenseRepository.findByExpenseId(expenseEntity.getExpenseId()))
+                .thenReturn(Optional.empty());
+
+        assertThrows(EntityNotFoundException.class, () -> {
+            this.expenseService.deleteExpense(expenseEntity.getExpenseId());
+        });
+
+        verify(this.expenseRepository, never()).delete(expenseEntity);
     }
 }
