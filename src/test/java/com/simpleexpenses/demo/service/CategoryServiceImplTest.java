@@ -1,6 +1,8 @@
 package com.simpleexpenses.demo.service;
 
 import com.simpleexpenses.demo.dto.CategoryDto;
+import com.simpleexpenses.demo.exceptions.AccessDeniedException;
+import com.simpleexpenses.demo.exceptions.EntityNotFoundException;
 import com.simpleexpenses.demo.model.entity.CategoryEntity;
 import com.simpleexpenses.demo.repository.CategoryRepository;
 import com.simpleexpenses.demo.repository.ExpenseRepository;
@@ -22,8 +24,9 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class CategoryServiceImplTest {
@@ -46,10 +49,23 @@ public class CategoryServiceImplTest {
         SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt));
     }
 
+    private CategoryEntity buildCategoryEntity() {
+        String categoryId = "categoryId";
+        String title = "title";
+        String color = "#ffffff";
+
+        return CategoryEntity
+                .builder()
+                .categoryId(categoryId)
+                .userId(userId)
+                .title(title)
+                .color(color)
+                .build();
+    }
+
     @Test
     final void testCreateCategory() {
 
-        String categoryId = "categoryId";
         String title = "title";
         String color = "#ffffff";
 
@@ -59,13 +75,7 @@ public class CategoryServiceImplTest {
                 .color(color)
                 .build();
 
-        CategoryEntity categoryEntity = CategoryEntity
-                .builder()
-                .categoryId(categoryId)
-                .userId(userId)
-                .title(title)
-                .color(color)
-                .build();
+        CategoryEntity categoryEntity = this.buildCategoryEntity();
 
         when(this.categoryRepository.save(any(CategoryEntity.class)))
                 .thenReturn(categoryEntity);
@@ -117,5 +127,83 @@ public class CategoryServiceImplTest {
             assertEquals(currentCategoryEntity.getColor(), currentCategoryDto.getColor());
             assertEquals(currentCategoryEntity.getUserId(), currentCategoryDto.getUserId());
         }
+    }
+
+    @Test
+    final void testUpdateCategory() {
+
+        String categoryId = "categoryId";
+
+        CategoryDto categoryDto = CategoryDto
+                .builder()
+                .title("New title")
+                .color("#ccc")
+                .build();
+
+        CategoryEntity categoryEntity = this.buildCategoryEntity();
+
+        CategoryEntity updatedCategoryEntity = CategoryEntity
+                .builder()
+                .Id(categoryEntity.getId())
+                .categoryId(categoryEntity.getCategoryId())
+                .title("New title")
+                .color("#ccc")
+                .build();
+
+        when(this.categoryRepository.findByCategoryId(categoryId))
+                .thenReturn(Optional.of(categoryEntity));
+        when(this.categoryRepository.save(categoryEntity))
+                .thenReturn(updatedCategoryEntity);
+
+        CategoryDto updatedCategoryDto = this.categoryService.updateCategory(categoryId, categoryDto);
+
+        assertEquals(categoryDto.getTitle(), updatedCategoryDto.getTitle());
+        assertEquals(categoryDto.getColor(), updatedCategoryDto.getColor());
+    }
+
+    @Test
+    final void testUpdateCategory_EntityNotFoundException() {
+
+        String categoryId = "categoryId";
+
+        CategoryDto categoryDto = CategoryDto
+                .builder()
+                .title("New title")
+                .color("#ccc")
+                .build();
+
+
+        when(this.categoryRepository.findByCategoryId(categoryId))
+                .thenReturn(Optional.empty());
+
+        assertThrows(EntityNotFoundException.class, () -> {
+            this.categoryService.updateCategory(categoryId, categoryDto);
+        });
+
+        verify(this.categoryRepository, never()).save(any(CategoryEntity.class));
+    }
+
+    @Test
+    final void testUpdateCategory_AccessDeniedException() {
+
+        String categoryId = "categoryId";
+
+        CategoryDto categoryDto = CategoryDto
+                .builder()
+                .title("New title")
+                .color("#ccc")
+                .build();
+
+        CategoryEntity categoryEntity = this.buildCategoryEntity();
+        categoryEntity.setUserId("another" + userId);
+
+        when(this.categoryRepository.findByCategoryId(categoryId))
+                .thenReturn(Optional.of(categoryEntity));
+
+        assertThrows(AccessDeniedException.class, () -> {
+            this.categoryService.updateCategory(categoryId, categoryDto);
+        });
+
+        verify(this.categoryRepository, never()).save(any(CategoryEntity.class));
     }
 }
