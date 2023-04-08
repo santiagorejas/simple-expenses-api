@@ -4,6 +4,7 @@ import com.simpleexpenses.demo.dto.CategoryDto;
 import com.simpleexpenses.demo.exceptions.AccessDeniedException;
 import com.simpleexpenses.demo.exceptions.EntityNotFoundException;
 import com.simpleexpenses.demo.model.entity.CategoryEntity;
+import com.simpleexpenses.demo.model.entity.ExpenseEntity;
 import com.simpleexpenses.demo.repository.CategoryRepository;
 import com.simpleexpenses.demo.repository.ExpenseRepository;
 import com.simpleexpenses.demo.service.impl.CategoryServiceImpl;
@@ -18,10 +19,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Optional;
+import java.math.BigDecimal;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -205,5 +204,85 @@ public class CategoryServiceImplTest {
         });
 
         verify(this.categoryRepository, never()).save(any(CategoryEntity.class));
+    }
+
+    @Test
+    final void testDeleteCategory() {
+
+        String categoryId = "categoryId";
+
+        CategoryEntity categoryEntity = this.buildCategoryEntity();
+        Set<CategoryEntity> categories = new HashSet<>();
+        categories.add(categoryEntity);
+
+        ExpenseEntity exp1 = ExpenseEntity
+                .builder()
+                .id(1L).expenseId("1").title("t1").amount(new BigDecimal(1)).categories(categories)
+                .build();
+        ExpenseEntity exp2 = ExpenseEntity
+                .builder().
+                id(2L).expenseId("2").title("t2").amount(new BigDecimal(2)).categories(categories)
+                .build();
+        ExpenseEntity exp3 = ExpenseEntity
+                .builder()
+                .id(3L).expenseId("3").title("t3").amount(new BigDecimal(3)).categories(categories)
+                .build();
+
+        List<ExpenseEntity> expenses = new ArrayList<>();
+        expenses.add(exp1);
+        expenses.add(exp2);
+        expenses.add(exp3);
+
+        categoryEntity.setExpenses(new HashSet<>(expenses));
+
+        when(this.categoryRepository.findByCategoryId(categoryId))
+                .thenReturn(Optional.of(categoryEntity));
+
+        this.categoryService.deleteCategory(categoryId);
+
+        for (ExpenseEntity exp: expenses) {
+            assertEquals(exp.getCategories().size(), 0);
+        }
+
+        verify(this.expenseRepository, times(expenses.size())).save(any(ExpenseEntity.class));
+        verify(this.categoryRepository, times(1)).delete(categoryEntity);
+
+    }
+
+    @Test
+    final void testDeleteCategory_EntityNotFoundException() {
+
+        String categoryId = "categoryId";
+
+        when(this.categoryRepository.findByCategoryId(categoryId))
+                .thenReturn(Optional.empty());
+
+        assertThrows(EntityNotFoundException.class, () -> {
+            this.categoryService.deleteCategory(categoryId);
+        });
+
+        verify(this.expenseRepository, never()).save(any(ExpenseEntity.class));
+        verify(this.categoryRepository, never()).delete(any(CategoryEntity.class));
+
+    }
+
+    @Test
+    final void testDeleteCategory_AccessDeniedException() {
+
+        String categoryId = "categoryId";
+
+        CategoryEntity categoryEntity = this.buildCategoryEntity();
+        categoryEntity.setUserId("another" + userId);
+
+        when(this.categoryRepository.findByCategoryId(categoryId))
+                .thenReturn(Optional.of(categoryEntity));
+
+        assertThrows(AccessDeniedException.class, () -> {
+            this.categoryService.deleteCategory(categoryId);
+        });
+
+        verify(this.expenseRepository, never()).save(any(ExpenseEntity.class));
+        verify(this.categoryRepository, never()).delete(categoryEntity);
+
     }
 }
